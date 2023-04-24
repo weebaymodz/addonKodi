@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon id="script.myaddon"
+    name="My Addon"
+    version="1.0"
+    provider-name="My Name">
+
+    <extension point="xbmc.python.pluginsource" library="Main.py">
+        <provides>video</provides>
+    </extension>
+
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">My Addon</summary>
+        <description lang="en">This addon plays videos.</description>
+        <platform>all</platform>
+        <language>en</language>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum></forum>
+        <website></website>
+        <email></email>
+        <source>https://github.com/bard/kodi-addon-myaddon</source>
+    </extension>
+
+</addon>
