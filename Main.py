@@ -49,7 +49,7 @@ class Addon(Addon):
         titles = [movie["title"] for movie in movies]
         selection = Dialog.select("Select a movie", titles)
         if selection != -1:
-            self.play_movie(movies[selection])
+            self.show_movie_sources(movies[selection])
 
     def show_top_rated(self):
         # Display the list of top rated movies.
@@ -57,7 +57,7 @@ class Addon(Addon):
         titles = [movie["title"] for movie in movies]
         selection = Dialog.select("Select a movie", titles)
         if selection != -1:
-            self.play_movie(movies[selection])
+            self.show_movie_sources(movies[selection])
 
     def show_genres(self):
         # Display the list of genres.
@@ -73,7 +73,7 @@ class Addon(Addon):
         titles = [movie["title"] for movie in movies]
         selection = Dialog.select("Select a movie", titles)
         if selection != -1:
-            self.play_movie(movies[selection])
+            self.show_movie_sources(movies[selection])
 
     def show_year_based(self):
         # Display the list of years.
@@ -89,7 +89,7 @@ class Addon(Addon):
         titles = [movie["title"] for movie in movies]
         selection = Dialog.select("Select a movie", titles)
         if selection != -1:
-            self.play_movie(movies[selection])
+            self.show_movie_sources(movies[selection])
 
     def search(self):
         # Search for movies or TV shows.
@@ -99,18 +99,26 @@ class Addon(Addon):
             titles = [result["title"] for result in results]
             selection = Dialog.select("Search results", titles)
             if selection != -1:
-                self.play_movie(results[selection])
+                self.show_movie_sources(results[selection])
 
     def show_watchlist(self):
         # Display the watchlist.
         titles = [item["title"] for item in self.watchlist]
         selection = Dialog.select("Watchlist", titles)
         if selection != -1:
-            self.play_movie(self.watchlist[selection])
+            self.show_movie_sources(self.watchlist[selection])
 
-    def play_movie(self, movie):
-        # Play the selected movie.
-        xbmc.play_video(movie["link"])
+    def show_movie_sources(self, movie):
+        # Display the list of available sources for the selected movie.
+        sources = self.get_movie_sources(movie["link"])
+        titles = [source["quality"] for source in sources]
+        selection = Dialog.select("Select a source", titles)
+        if selection != -1:
+            self.play_movie(sources[selection])
+
+    def play_movie(self, source):
+        # Play the selected movie source.
+        xbmc.play_video(source["link"])
 
     def add_to_watchlist(self, movie):
         # Add a movie to the watchlist.
@@ -137,6 +145,24 @@ class Addon(Addon):
             })
 
         return movies
+
+    def get_movie_sources(self, movie_link):
+        # Get the list of available sources for a specific movie from the website.
+        response = requests.get(movie_link)
+        soup = BeautifulSoup(response.content, "html.parser")
+        source_list = soup.find("ul", class_="source-list")
+
+        # Create a list of sources.
+        sources = []
+        for source in source_list.children:
+            quality = source.find("span", class_="quality").text
+            link = source.find("a")["href"]
+            sources.append({
+                "quality": quality,
+                "link": link
+            })
+
+        return sources
 
     def get_trending_movies(self):
         # Get the list of trending movies from the website.
