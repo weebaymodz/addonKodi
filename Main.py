@@ -141,7 +141,8 @@ class Addon(Addon):
                 "title": title,
                 "year": year,
                 "genre": genre,
-                "link": link
+                "link": link,
+                "sources": self.get_movie_sources(link)
             })
 
         return movies
@@ -181,7 +182,8 @@ class Addon(Addon):
                 "title": title,
                 "year": year,
                 "genre": genre,
-                "link": link
+                "link": link,
+                "sources": self.get_movie_sources(link)
             })
 
         return movies
@@ -203,7 +205,8 @@ class Addon(Addon):
                 "title": title,
                 "year": year,
                 "genre": genre,
-                "link": link
+                "link": link,
+                "sources": self.get_movie_sources(link)
             })
 
         return movies
@@ -241,7 +244,8 @@ class Addon(Addon):
                 "title": title,
                 "year": year,
                 "genre": genre,
-                "link": link
+                "link": link,
+                "sources": self.get_movie_sources(link)
             })
 
         return movies
@@ -279,7 +283,8 @@ class Addon(Addon):
                 "title": title,
                 "year": year,
                 "genre": genre,
-                "link": link
+                "link": link,
+                "sources": self.get_movie_sources(link)
             })
 
         return movies
@@ -301,7 +306,8 @@ class Addon(Addon):
                 "title": title,
                 "year": year,
                 "genre": genre,
-                "link": link
+                "link": link,
+                "sources": self.get_movie_sources(link)
             })
 
         return results
