@@ -10,7 +10,7 @@
 
     <extension point="xbmc.addon.metadata">
         <summary lang="en">My Addon</summary>
-        <description lang="en">This addon plays videos and provides categories like Movies, TV Shows, Genres, Top Rated, Trending, New Releases, and Search.</description>
+        <description lang="en">This addon plays videos and provides categories like Trending Movies/TV Shows, Top Rated/Most Watched, Genres, and Year-based Lists.</description>
         <platform>all</platform>
         <language>en</language>
         <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>

@@ -19,57 +19,77 @@ class Addon(Addon):
         # Load the resources.
         self.resources = {}
         self.resources["movies"] = self.get_movies()
+        self.resources["trending"] = self.get_trending_movies()
+        self.resources["top_rated"] = self.get_top_rated_movies()
+        self.resources["genres"] = self.get_genre_based_movies()
+        self.resources["year_based"] = self.get_year_based_movies()
 
     def on_demand(self):
         # Get the user's input.
-        action = Dialog.select("Select an action", ["Movies", "TV Shows", "Genres", "Top Rated", "Trending", "New Releases", "Search", "Watchlist", "Exit"])
+        action = Dialog.select("Select an action", ["Trending Movies/TV Shows", "Top Rated/Most Watched", "Genres", "Year-based Lists", "Search", "Watchlist", "Exit"])
 
         if action == 0:
-            self.show_movies()
+            self.show_trending()
         elif action == 1:
-            self.show_tv_shows()
+            self.show_top_rated()
         elif action == 2:
             self.show_genres()
         elif action == 3:
-            self.show_top_rated()
+            self.show_year_based()
         elif action == 4:
-            self.show_trending()
-        elif action == 5:
-            self.show_new_releases()
-        elif action == 6:
             self.search()
-        elif action == 7:
+        elif action == 5:
             self.show_watchlist()
-        elif action == 8:
+        elif action == 6:
             return
 
-    def show_movies(self):
-        # Display the list of movies.
-        movies = self.resources["movies"]
+    def show_trending(self):
+        # Display the list of trending movies.
+        movies = self.resources["trending"]
         titles = [movie["title"] for movie in movies]
         selection = Dialog.select("Select a movie", titles)
         if selection != -1:
             self.play_movie(movies[selection])
 
-    def show_tv_shows(self):
-        # Display the list of TV shows.
-        pass
+    def show_top_rated(self):
+        # Display the list of top rated movies.
+        movies = self.resources["top_rated"]
+        titles = [movie["title"] for movie in movies]
+        selection = Dialog.select("Select a movie", titles)
+        if selection != -1:
+            self.play_movie(movies[selection])
 
     def show_genres(self):
         # Display the list of genres.
-        pass
+        genres = list(self.resources["genres"].keys())
+        selection = Dialog.select("Select a genre", genres)
+        if selection != -1:
+            genre = genres[selection]
+            self.show_genre_movies(genre)
 
-    def show_top_rated(self):
-        # Display the list of top rated movies.
-        pass
+    def show_genre_movies(self, genre):
+        # Display the list of movies for a specific genre.
+        movies = self.resources["genres"][genre]
+        titles = [movie["title"] for movie in movies]
+        selection = Dialog.select("Select a movie", titles)
+        if selection != -1:
+            self.play_movie(movies[selection])
 
-    def show_trending(self):
-        # Display the list of trending movies.
-        pass
+    def show_year_based(self):
+        # Display the list of years.
+        years = list(self.resources["year_based"].keys())
+        selection = Dialog.select("Select a year", years)
+        if selection != -1:
+            year = years[selection]
+            self.show_year_movies(year)
 
-    def show_new_releases(self):
-        # Display the list of new releases.
-        pass
+    def show_year_movies(self, year):
+        # Display the list of movies for a specific year.
+        movies = self.resources["year_based"][year]
+        titles = [movie["title"] for movie in movies]
+        selection = Dialog.select("Select a movie", titles)
+        if selection != -1:
+            self.play_movie(movies[selection])
 
     def search(self):
         # Search for movies or TV shows.
@@ -103,6 +123,126 @@ class Addon(Addon):
         movie_list = soup.find("ul", class_="movie-list")
 
         # Create a list of movies.
+        movies = []
+        for movie in movie_list.children:
+            title = movie.find("a").text
+            year = movie.find("span", class_="year").text
+            genre = movie.find("span", class_="genre").text
+            link = movie.find("a")["href"]
+            movies.append({
+                "title": title,
+                "year": year,
+                "genre": genre,
+                "link": link
+            })
+
+        return movies
+
+    def get_trending_movies(self):
+        # Get the list of trending movies from the website.
+        response = requests.get("https://ww4.123moviesfree.net/trending")
+        soup = BeautifulSoup(response.content, "html.parser")
+        movie_list = soup.find("ul", class_="movie-list")
+
+        # Create a list of trending movies.
+        movies = []
+        for movie in movie_list.children:
+            title = movie.find("a").text
+            year = movie.find("span", class_="year").text
+            genre = movie.find("span", class_="genre").text
+            link = movie.find("a")["href"]
+            movies.append({
+                "title": title,
+                "year": year,
+                "genre": genre,
+                "link": link
+            })
+
+        return movies
+
+    def get_top_rated_movies(self):
+        # Get the list of top rated movies from the website.
+        response = requests.get("https://ww4.123moviesfree.net/top-rated")
+        soup = BeautifulSoup(response.content, "html.parser")
+        movie_list = soup.find("ul", class_="movie-list")
+
+        # Create a list of top rated movies.
+        movies = []
+        for movie in movie_list.children:
+            title = movie.find("a").text
+            year = movie.find("span", class_="year").text
+            genre = movie.find("span", class_="genre").text
+            link = movie.find("a")["href"]
+            movies.append({
+                "title": title,
+                "year": year,
+                "genre": genre,
+                "link": link
+            })
+
+        return movies
+
+    def get_genre_based_movies(self):
+        # Get the list of movies by genre from the website.
+        response = requests.get("https://ww4.123moviesfree.net/genres")
+        soup = BeautifulSoup(response.content, "html.parser")
+        genre_list = soup.find("ul", class_="genre-list")
+
+        # Create a dictionary of movies by genre.
+        genres = {}
+        for genre in genre_list.children:
+            genre_name = genre.find("a").text
+            genre_link = genre.find("a")["href"]
+            genre_movies = self.get_movies_by_genre(genre_link)
+            genres[genre_name] = genre_movies
+
+        return genres
+
+    def get_movies_by_genre(self, genre_link):
+        # Get the list of movies for a specific genre from the website.
+        response = requests.get(genre_link)
+        soup = BeautifulSoup(response.content, "html.parser")
+        movie_list = soup.find("ul", class_="movie-list")
+
+        # Create a list of movies for the genre.
+        movies = []
+        for movie in movie_list.children:
+            title = movie.find("a").text
+            year = movie.find("span", class_="year").text
+            genre = movie.find("span", class_="genre").text
+            link = movie.find("a")["href"]
+            movies.append({
+                "title": title,
+                "year": year,
+                "genre": genre,
+                "link": link
+            })
+
+        return movies
+
+    def get_year_based_movies(self):
+        # Get the list of movies by year from the website.
+        response = requests.get("https://ww4.123moviesfree.net/years")
+        soup = BeautifulSoup(response.content, "html.parser")
+        year_list = soup.find("ul", class_="year-list")
+
+        # Create a dictionary of movies by year.
+        years = {}
+        for year in year_list.children:
+            year_name = year.find("a").text
+            year_link = year.find("a")["href"]
+            year_movies = self.get_movies_by_year(year_link)
+            years[year_name] = year_movies
+
+        return years
+
+    def get_movies_by_year(self, year_link):
+        # Get the list of movies for a specific year from the website.
+        response = requests.get(year_link)
+        soup = BeautifulSoup(response.content, "html.parser")
+        movie_list = soup.find("ul", class_="movie-list")
+
+        # Create a list of movies for the year.
         movies = []
         for movie in movie_list.children:
             title = movie.find("a").text
